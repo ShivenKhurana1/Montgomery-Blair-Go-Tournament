@@ -14,7 +14,7 @@ export default function Hero() {
       <div className="absolute bottom-32 right-24 hidden lg:block">
         <div className="go-stone-black h-10 w-10"></div>
       </div>
-      
+
       <div className="container-custom relative">
         <div className="mx-auto max-w-3xl text-center animate-slide-up">
           <div className="mb-6 flex items-center justify-center space-x-3">
@@ -29,7 +29,10 @@ export default function Hero() {
             Saturday, March 21st
           </p>
           <p className="mt-2 text-lg text-white/80 drop-shadow-md">
-            Time: TBD
+            Time: 10:00 AM - 5:00 PM
+          </p>
+          <p className="mt-2 text-lg text-white/80 drop-shadow-md">
+            Registration opens at 9:00 AM
           </p>
           <p className="mt-6 text-lg leading-8 text-white/90 drop-shadow-md sm:text-xl">
             Join us for an exciting Go tournament at Montgomery Blair High School.

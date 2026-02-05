@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Montgomery Blair Go Tournament - Saturday, March 21st, 2026',
-  description: 'Register for the Montgomery Blair Go Tournament on Saturday, March 21st, 2026. Join us at Montgomery Blair High School for competitive Go matches. Time: TBD',
+  description: 'Register for the Montgomery Blair Go Tournament on Saturday, March 21st, 2026. Join us at Montgomery Blair High School for competitive Go matches. Time: 10:00 AM - 5:00 PM',
 }
 
 export default function RootLayout({

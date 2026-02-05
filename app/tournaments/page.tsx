@@ -5,7 +5,7 @@ export default function TournamentsPage() {
     {
       id: 1,
       name: 'Montgomery Blair Go Tournament',
-      date: 'Saturday, March 21st (Time: TBD)',
+      date: 'Saturday, March 21st (10:00 AM - 5:00 PM)',
       location: 'Montgomery Blair High School',
       participants: 0,
       status: 'Upcoming',
@@ -35,7 +35,7 @@ export default function TournamentsPage() {
           >
             {/* Navy pattern accent */}
             <div className="absolute top-0 right-0 h-20 w-20 bg-navy-50 opacity-30"></div>
-            
+
             <div className="relative mb-4 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 {tournament.status === 'Upcoming' ? (
@@ -44,11 +44,10 @@ export default function TournamentsPage() {
                   <div className="go-stone-white h-4 w-4"></div>
                 )}
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    tournament.status === 'Upcoming'
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${tournament.status === 'Upcoming'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-gray-100 text-gray-800'
-                  }`}
+                    }`}
                 >
                   {tournament.status}
                 </span>

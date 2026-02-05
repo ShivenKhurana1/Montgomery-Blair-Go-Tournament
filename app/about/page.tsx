@@ -21,7 +21,7 @@ export default function AboutPage() {
             experienced player, this tournament offers a great opportunity to play competitive Go
             and meet fellow players.
           </p>
-          
+
           <h2 className="mt-12 text-2xl font-bold text-gray-900">
             Tournament Details
           </h2>
@@ -39,7 +39,7 @@ export default function AboutPage() {
                 <div className="go-stone-white h-5 w-5 rounded-full border-2 border-gray-300"></div>
               </div>
               <span>
-                <strong className="text-gray-900">Time:</strong> TBD (To Be Determined)
+                <strong className="text-gray-900">Time:</strong> 10:00 AM - 5:00 PM (Check-in at 9:00 AM)
               </span>
             </li>
             <li className="flex items-start">
