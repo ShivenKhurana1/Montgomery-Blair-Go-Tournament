@@ -36,7 +36,7 @@ export default function Hero() {
           </p>
           <p className="mt-6 text-lg leading-8 text-white/90 drop-shadow-md sm:text-xl">
             Join us for an exciting Go tournament at Montgomery Blair High School.
-            Register now to secure your spot in this competitive event.
+            Register now to secure your spot in this competitive event. (Montgomery Blair Students only)
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a href="/registration" className="btn-primary bg-white text-navy-900 hover:bg-gray-100 text-lg px-8 py-4">
