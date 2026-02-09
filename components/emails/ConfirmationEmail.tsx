@@ -5,6 +5,7 @@ interface ConfirmationEmailProps {
     tournamentName: string;
     date: string;
     location: string;
+    tShirtSize?: string;
 }
 
 export const ConfirmationEmail: React.FC<Readonly<ConfirmationEmailProps>> = ({
@@ -12,6 +13,7 @@ export const ConfirmationEmail: React.FC<Readonly<ConfirmationEmailProps>> = ({
     tournamentName,
     date,
     location,
+    tShirtSize,
 }) => (
     <div style={{
         fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -51,6 +53,7 @@ export const ConfirmationEmail: React.FC<Readonly<ConfirmationEmailProps>> = ({
                 <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' }}>Tournament Details</h2>
                 <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Date:</strong> {date}</p>
                 <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Location:</strong> {location}</p>
+                {tShirtSize && <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>T-Shirt Size:</strong> {tShirtSize}</p>}
             </div>
 
             <p style={{ fontSize: '16px', lineHeight: '24px', marginBottom: '24px' }}>

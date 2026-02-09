@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {
-        const { fullName, email } = await request.json();
+        const { fullName, email, tShirtSize } = await request.json();
 
         if (!email || !fullName) {
             return NextResponse.json({ error: 'Email and full name are required' }, { status: 400 });
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
                             <h2 style="font-size: 18px; font-weight: bold; margin-bottom: 12px;">Tournament Details</h2>
                             <p style="margin: 4px 0; font-size: 14px;"><strong>Date:</strong> Saturday, March 21st, 2026</p>
                             <p style="margin: 4px 0; font-size: 14px;"><strong>Location:</strong> Montgomery Blair High School</p>
+                            <p style="margin: 4px 0; font-size: 14px;"><strong>T-Shirt Size:</strong> ${tShirtSize || 'Not specified'}</p>
                         </div>
                         
                         <p style="font-size: 16px; line-height: 24px; margin-bottom: 24px;">

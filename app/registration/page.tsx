@@ -10,6 +10,7 @@ export default function RegistrationPage() {
     emergencyContactNumber: '',
     grade: '',
     studentID: '',
+    tShirtSize: '',
     estimatedRank: '',
     agreeToTerms: false,
   })
@@ -51,6 +52,7 @@ export default function RegistrationPage() {
     emergencyContactName: 'entry.243557117',
     emergencyContactNumber: 'entry.769706486',
     studentID: 'entry.1456054808',
+    tShirtSize: 'entry.1748618820', // Verified via browser inspection
     estimatedRank: 'entry.1509461048',
   }
 
@@ -102,6 +104,10 @@ export default function RegistrationPage() {
         formDataToSubmit.append(GOOGLE_FORM_ENTRIES.studentID, formData.studentID)
       }
 
+      if (GOOGLE_FORM_ENTRIES.tShirtSize && formData.tShirtSize) {
+        formDataToSubmit.append(GOOGLE_FORM_ENTRIES.tShirtSize, formData.tShirtSize)
+      }
+
       // Estimated rank is optional
       if (GOOGLE_FORM_ENTRIES.estimatedRank && formData.estimatedRank) {
         formDataToSubmit.append(GOOGLE_FORM_ENTRIES.estimatedRank, formData.estimatedRank)
@@ -133,6 +139,7 @@ export default function RegistrationPage() {
           body: JSON.stringify({
             fullName: formData.fullName,
             email: formData.email,
+            tShirtSize: formData.tShirtSize,
           }),
         });
       } catch (emailError) {
@@ -153,6 +160,7 @@ export default function RegistrationPage() {
         emergencyContactNumber: '',
         grade: '',
         studentID: '',
+        tShirtSize: '',
         estimatedRank: '',
         agreeToTerms: false,
       })
@@ -352,6 +360,32 @@ export default function RegistrationPage() {
                     placeholder="Enter your student ID"
                   />
                 </div>
+              </div>
+
+              {/* T-Shirt Size */}
+              <div>
+                <label
+                  htmlFor="tShirtSize"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  T-Shirt Size *
+                </label>
+                <select
+                  id="tShirtSize"
+                  name="tShirtSize"
+                  required
+                  value={formData.tShirtSize}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:border-navy-700 focus:ring-navy-700"
+                >
+                  <option value="">Select your t-shirt size</option>
+                  <option value="XS">Extra Small (XS)</option>
+                  <option value="S">Small (S)</option>
+                  <option value="M">Medium (M)</option>
+                  <option value="L">Large (L)</option>
+                  <option value="XL">Extra Large (XL)</option>
+                  <option value="XXL">2XL</option>
+                </select>
               </div>
 
               {/* Estimated Rank (Optional) */}
