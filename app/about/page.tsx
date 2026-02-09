@@ -39,7 +39,7 @@ export default function AboutPage() {
                 <div className="go-stone-white h-5 w-5 rounded-full border-2 border-gray-300"></div>
               </div>
               <span>
-                <strong className="text-gray-900">Time:</strong> 10:00 AM - 5:00 PM (Check-in at 9:00 AM)
+                <strong className="text-gray-900">Time:</strong> 9:30 AM - 5:00 PM (Check-in at 9:00 AM)
               </span>
             </li>
             <li className="flex items-start">
@@ -63,7 +63,7 @@ export default function AboutPage() {
                 <div className="go-stone-white h-5 w-5 rounded-full border-2 border-gray-300"></div>
               </div>
               <span>
-                <strong className="text-gray-900">Registration:</strong> Open now - register online to secure your spot
+                <strong className="text-gray-900">Registration:</strong> $20 (collected day of at the event) - register online to secure your spot
               </span>
             </li>
           </ul>

@@ -5,7 +5,7 @@ export default function TournamentsPage() {
     {
       id: 1,
       name: 'Montgomery Blair Go Tournament',
-      date: 'Saturday, March 21st (10:00 AM - 5:00 PM)',
+      date: 'Saturday, March 21st (9:30 AM - 5:00 PM)',
       location: 'Montgomery Blair High School',
       participants: 0,
       status: 'Upcoming',
@@ -45,8 +45,8 @@ export default function TournamentsPage() {
                 )}
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${tournament.status === 'Upcoming'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
                     }`}
                 >
                   {tournament.status}

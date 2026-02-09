@@ -29,10 +29,10 @@ export default function Hero() {
             Saturday, March 21st
           </p>
           <p className="mt-2 text-lg text-white/80 drop-shadow-md">
-            Time: 10:00 AM - 5:00 PM
+            Time: 9:30 AM - 5:00 PM
           </p>
           <p className="mt-2 text-lg text-white/80 drop-shadow-md">
-            Registration opens at 9:00 AM
+            Registration: $20 (collected day of at the event)
           </p>
           <p className="mt-6 text-lg leading-8 text-white/90 drop-shadow-md sm:text-xl">
             Join us for an exciting Go tournament at Montgomery Blair High School.
