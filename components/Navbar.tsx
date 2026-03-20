@@ -38,6 +38,12 @@ export default function Navbar() {
               Tournaments
             </Link>
             <Link
+              href="/rankings"
+              className="text-sm font-medium text-gray-700 transition-colors hover:text-navy-700"
+            >
+              Rankings
+            </Link>
+            <Link
               href="/registration"
               className="text-sm font-medium text-gray-700 transition-colors hover:text-navy-700"
             >
@@ -92,6 +98,13 @@ export default function Navbar() {
                 onClick={() => setIsOpen(false)}
               >
                 Tournaments
+              </Link>
+              <Link
+                href="/rankings"
+                className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50"
+                onClick={() => setIsOpen(false)}
+              >
+                Rankings
               </Link>
               <Link
                 href="/registration"

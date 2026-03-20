@@ -120,9 +120,12 @@ export default function TournamentsPage() {
                 Register Now
               </Link>
             ) : (
-              <button className="mt-6 w-full btn-secondary">
+              <Link
+                href="/rankings"
+                className="mt-6 w-full btn-secondary block text-center"
+              >
                 View Results
-              </button>
+              </Link>
             )}
           </div>
         ))}
