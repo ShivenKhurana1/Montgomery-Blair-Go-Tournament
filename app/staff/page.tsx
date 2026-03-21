@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { useTournamentData } from '@/hooks/useTournamentData'
+import { useState, useMemo } from 'react'
+import { useTournamentData, Match } from '@/hooks/useTournamentData'
 
 export default function StaffPage() {
-  const { players, rounds, addPlayer, removePlayer, updateMatchResult, generateNextRound, deleteLastRound, resetTournament, isLoaded, isSaving } = useTournamentData()
+  const { players, rounds, addPlayer, removePlayer, updateMatchResult, addManualMatch, deleteMatch, generateNextRound, deleteLastRound, resetTournament, isLoaded, isSaving } = useTournamentData()
   const [activeTab, setActiveTab] = useState<'players' | 'pairings' | 'results'>('players')
   const [newPlayerName, setNewPlayerName] = useState('')
 
@@ -26,6 +26,22 @@ export default function StaffPage() {
       resetTournament()
       setActiveTab('players')
     }
+  }
+
+  // Helper to get players not already in the current round
+  const getAvailablePlayers = (currentRound: number, excludeMatchId?: string, currentPlayerId?: string) => {
+    const round = rounds.find(r => r.roundNumber === currentRound)
+    if (!round) return players
+
+    const pairedPlayerIds = new Set<string>()
+    round.matches.forEach(m => {
+      if (m.id !== excludeMatchId) {
+        if (m.playerAId) pairedPlayerIds.add(m.playerAId)
+        if (m.playerBId) pairedPlayerIds.add(m.playerBId)
+      }
+    })
+
+    return players.filter(p => !pairedPlayerIds.has(p.id) || p.id === currentPlayerId)
   }
 
   if (!isLoaded) {
@@ -72,7 +88,7 @@ export default function StaffPage() {
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Generate Pairings
+          Manage Pairings
         </button>
         <button
           onClick={() => setActiveTab('results')}
@@ -137,20 +153,74 @@ export default function StaffPage() {
       {activeTab === 'pairings' && (
         <div className="space-y-6">
           <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-6 text-2xl font-semibold text-gray-900">Generate Next Round</h2>
-            <p className="mb-6 text-sm text-gray-600">
-              Current Round: {rounds.length > 0 ? rounds[0].roundNumber : 0}. 
-              Make sure all results from the previous round are entered before generating new pairings.
-            </p>
-            <button
-              onClick={() => {
-                generateNextRound()
-                setActiveTab('results')
-              }}
-              className="rounded-xl bg-green-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-green-700"
-            >
-              Generate Round {rounds.length > 0 ? rounds[0].roundNumber + 1 : 1} Pairings
-            </button>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-gray-900">Round {rounds.length > 0 ? rounds[0].roundNumber : 1} Pairings</h2>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => generateNextRound()}
+                  className="rounded-xl bg-navy-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-navy-700"
+                >
+                  Auto-Generate
+                </button>
+                <button
+                  onClick={() => {
+                    if (rounds.length === 0) {
+                       // First create the round if it doesn't exist
+                       // Actually useTournamentData doesn't have createEmptyRound yet, but 
+                       // we'll assume for simplicity directors can auto-gen then edit, or we add one manual match.
+                    }
+                    addManualMatch(rounds.length > 0 ? rounds[0].roundNumber : 1)
+                  }}
+                  className="rounded-xl bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-200"
+                >
+                  Add Table
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {(rounds.length > 0 ? rounds[0].matches : []).map((match) => (
+                <div key={match.id} className="flex flex-col space-y-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Table {match.id}</span>
+                    <button
+                      onClick={() => deleteMatch(rounds[0].roundNumber, match.id)}
+                      className="text-[10px] font-bold text-red-400 hover:text-red-600"
+                    >
+                      REMOVE
+                    </button>
+                  </div>
+                  <div className="grid gap-2">
+                    <select
+                      value={match.playerAId}
+                      onChange={(e) => updateMatchResult(rounds[0].roundNumber, match.id, { playerAId: e.target.value })}
+                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-navy-500 focus:outline-none"
+                    >
+                      <option value="">Select Player A</option>
+                      {getAvailablePlayers(rounds[0].roundNumber, match.id, match.playerAId).map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    <div className="text-center text-[10px] font-bold text-gray-300">VS</div>
+                    <select
+                      value={match.playerBId}
+                      onChange={(e) => updateMatchResult(rounds[0].roundNumber, match.id, { playerBId: e.target.value })}
+                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-navy-500 focus:outline-none"
+                    >
+                      <option value="">Select Player B</option>
+                      {getAvailablePlayers(rounds[0].roundNumber, match.id, match.playerBId).map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ))}
+              {(rounds.length === 0 || rounds[0].matches.length === 0) && (
+                <div className="col-span-full py-12 text-center text-sm text-gray-500">
+                  No pairings yet for this round. Use "Auto-Generate" or "Add Table".
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="rounded-3xl border border-red-100 bg-red-50 p-6 shadow-sm">
@@ -171,9 +241,6 @@ export default function StaffPage() {
                 Reset All Pairings
               </button>
             </div>
-            <p className="mt-4 text-xs text-red-700/70">
-              Warning: These actions are permanent. "Reset All Pairings" will clear all match history but keep registered players.
-            </p>
           </div>
         </div>
       )}
@@ -205,31 +272,33 @@ export default function StaffPage() {
                         {/* Player A Row */}
                         <div className="flex items-center justify-between">
                           <div className="flex flex-1 items-center space-x-3">
-                            <span className="text-sm font-medium text-gray-900">
-                              {players.find(p => p.id === match.playerAId)?.name || 'Unknown'}
+                            <span className="text-sm font-medium text-gray-900 text-truncate max-w-[120px]">
+                              {players.find(p => p.id === match.playerAId)?.name || 'Select Player'}
                             </span>
-                            <div className="flex space-x-1">
-                              <button
-                                onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerAId })}
-                                className={`rounded px-2 py-0.5 text-[10px] font-bold ${
-                                  match.winnerId === match.playerAId
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                }`}
-                              >
-                                WIN
-                              </button>
-                              <button
-                                onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerBId })}
-                                className={`rounded px-2 py-0.5 text-[10px] font-bold ${
-                                  match.winnerId === match.playerBId
-                                    ? 'bg-red-600 text-white'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                }`}
-                              >
-                                LOSS
-                              </button>
-                            </div>
+                            {match.playerAId && match.playerBId && (
+                              <div className="flex space-x-1">
+                                <button
+                                  onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerAId })}
+                                  className={`rounded px-2 py-0.5 text-[10px] font-bold ${
+                                    match.winnerId === match.playerAId
+                                      ? 'bg-green-600 text-white'
+                                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                  }`}
+                                >
+                                  WIN
+                                </button>
+                                <button
+                                  onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerBId })}
+                                  className={`rounded px-2 py-0.5 text-[10px] font-bold ${
+                                    match.winnerId === match.playerBId
+                                      ? 'bg-red-600 text-white'
+                                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                  }`}
+                                >
+                                  LOSS
+                                </button>
+                              </div>
+                            )}
                           </div>
                           <div className="flex items-center space-x-2">
                             <span className="text-[10px] uppercase text-gray-400">Points</span>
@@ -248,31 +317,33 @@ export default function StaffPage() {
                         {/* Player B Row */}
                         <div className="flex items-center justify-between">
                           <div className="flex flex-1 items-center space-x-3">
-                            <span className="text-sm font-medium text-gray-900">
-                              {players.find(p => p.id === match.playerBId)?.name || 'Unknown'}
+                            <span className="text-sm font-medium text-gray-900 text-truncate max-w-[120px]">
+                              {players.find(p => p.id === match.playerBId)?.name || 'Select Player'}
                             </span>
-                            <div className="flex space-x-1">
-                              <button
-                                onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerBId })}
-                                className={`rounded px-2 py-0.5 text-[10px] font-bold ${
-                                  match.winnerId === match.playerBId
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                }`}
-                              >
-                                WIN
-                              </button>
-                              <button
-                                onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerAId })}
-                                className={`rounded px-2 py-0.5 text-[10px] font-bold ${
-                                  match.winnerId === match.playerAId
-                                    ? 'bg-red-600 text-white'
-                                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                }`}
-                              >
-                                LOSS
-                              </button>
-                            </div>
+                            {match.playerAId && match.playerBId && (
+                              <div className="flex space-x-1">
+                                <button
+                                  onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerBId })}
+                                  className={`rounded px-2 py-0.5 text-[10px] font-bold ${
+                                    match.winnerId === match.playerBId
+                                      ? 'bg-green-600 text-white'
+                                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                  }`}
+                                >
+                                  WIN
+                                </button>
+                                <button
+                                  onClick={() => updateMatchResult(round.roundNumber, match.id, { winnerId: match.playerAId })}
+                                  className={`rounded px-2 py-0.5 text-[10px] font-bold ${
+                                    match.winnerId === match.playerAId
+                                      ? 'bg-red-600 text-white'
+                                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                  }`}
+                                >
+                                  LOSS
+                                </button>
+                              </div>
+                            )}
                           </div>
                           <div className="flex items-center space-x-2">
                             <span className="text-[10px] uppercase text-gray-400">Points</span>
@@ -301,7 +372,7 @@ export default function StaffPage() {
           ))}
           {rounds.length === 0 && (
             <div className="py-12 text-center text-gray-500">
-              No rounds generated yet. Go to "Generate Pairings" to start.
+              No rounds generated yet. Go to "Manage Pairings" to start.
             </div>
           )}
         </div>

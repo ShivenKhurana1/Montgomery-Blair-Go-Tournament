@@ -182,8 +182,8 @@ export default function RankingsPage() {
                     id={match.id}
                     playerAId={match.playerAId}
                     playerBId={match.playerBId}
-                    playerAName={players.find(p => p.id === match.playerAId)?.name || 'Unknown'}
-                    playerBName={players.find(p => p.id === match.playerBId)?.name || 'Unknown'}
+                    playerAName={players.find(p => p.id === match.playerAId)?.name || 'TBD'}
+                    playerBName={players.find(p => p.id === match.playerBId)?.name || 'TBD'}
                     winnerId={match.winnerId}
                     pointsA={match.pointsA}
                     pointsB={match.pointsB}

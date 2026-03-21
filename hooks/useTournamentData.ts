@@ -141,6 +141,40 @@ export function useTournamentData() {
     saveData(players, newRounds)
   }, [players, rounds, saveData])
 
+  const addManualMatch = useCallback((roundNumber: number) => {
+    const newRounds = rounds.map(r => {
+      if (r.roundNumber !== roundNumber) return r
+      return {
+        ...r,
+        matches: [
+          ...r.matches,
+          {
+            id: String(r.matches.length + 1),
+            playerAId: '',
+            playerBId: '',
+            winnerId: null,
+            pointsA: '',
+            pointsB: '',
+          }
+        ]
+      }
+    })
+    setRounds(newRounds)
+    saveData(players, newRounds)
+  }, [players, rounds, saveData])
+
+  const deleteMatch = useCallback((roundNumber: number, matchId: string) => {
+    const newRounds = rounds.map(r => {
+      if (r.roundNumber !== roundNumber) return r
+      return {
+        ...r,
+        matches: r.matches.filter(m => m.id !== matchId)
+      }
+    })
+    setRounds(newRounds)
+    saveData(players, newRounds)
+  }, [players, rounds, saveData])
+
   const deleteLastRound = useCallback(() => {
     const newRounds = rounds.slice(1)
     setRounds(newRounds)
@@ -158,6 +192,8 @@ export function useTournamentData() {
     addPlayer,
     removePlayer,
     updateMatchResult,
+    addManualMatch,
+    deleteMatch,
     generateNextRound,
     deleteLastRound,
     resetTournament,
