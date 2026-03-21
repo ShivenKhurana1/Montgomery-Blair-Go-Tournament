@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 export type Player = {
   id: string
@@ -11,7 +11,7 @@ export type Match = {
   id: string
   playerAId: string
   playerBId: string
-  winnerId: string | 'draw' | null // ID of the winner, 'draw', or null if not played
+  winnerId: string | 'draw' | null
   pointsA?: string
   pointsB?: string
 }
@@ -30,53 +30,80 @@ export type Standing = {
   playerId: string
 }
 
-const STORAGE_KEYS = {
-  PLAYERS: 'mbg_tournament_players',
-  ROUNDS: 'mbg_tournament_rounds',
-}
-
 export function useTournamentData() {
   const [players, setPlayers] = useState<Player[]>([])
   const [rounds, setRounds] = useState<Round[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  
+  // Use a ref to track if the current process is the one saving to avoid race conditions with polling
+  const isUpdatingRef = useRef(false)
 
-  // Load from localStorage
-  useEffect(() => {
-    const savedPlayers = localStorage.getItem(STORAGE_KEYS.PLAYERS)
-    const savedRounds = localStorage.getItem(STORAGE_KEYS.ROUNDS)
+  const fetchData = useCallback(async () => {
+    // If we're currently in the middle of a local update/save, don't fetch yet
+    if (isUpdatingRef.current) return
 
-    if (savedPlayers) setPlayers(JSON.parse(savedPlayers))
-    if (savedRounds) setRounds(JSON.parse(savedRounds))
-    
-    setIsLoaded(true)
+    try {
+      const res = await fetch('/api/tournament')
+      if (res.ok) {
+        const data = await res.json()
+        setPlayers(data.players || [])
+        setRounds(data.rounds || [])
+        setIsLoaded(true)
+      }
+    } catch (error) {
+      console.error('Failed to fetch tournament data:', error)
+    }
   }, [])
 
-  // Save to localStorage
+  // Initial load
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players))
-    }
-  }, [players, isLoaded])
+    fetchData()
+  }, [fetchData])
 
+  // Polling every 5 seconds for cross-user updates
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(STORAGE_KEYS.ROUNDS, JSON.stringify(rounds))
+    const interval = setInterval(fetchData, 5000)
+    return () => clearInterval(interval)
+  }, [fetchData])
+
+  const saveData = useCallback(async (newPlayers: Player[], newRounds: Round[]) => {
+    isUpdatingRef.current = true
+    setIsSaving(true)
+    try {
+      await fetch('/api/tournament', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ players: newPlayers, rounds: newRounds }),
+      })
+    } catch (error) {
+      console.error('Failed to save tournament data:', error)
+    } finally {
+      setIsSaving(false)
+      // Allow polling to resume after a short delay to ensure the server has processed the update
+      setTimeout(() => {
+        isUpdatingRef.current = false
+      }, 1000)
     }
-  }, [rounds, isLoaded])
+  }, [])
 
   const addPlayer = useCallback((name: string) => {
-    setPlayers(prev => [
-      ...prev,
+    const newPlayers = [
+      ...players,
       { id: Math.random().toString(36).substr(2, 9), name }
-    ])
-  }, [])
+    ]
+    setPlayers(newPlayers)
+    saveData(newPlayers, rounds)
+  }, [players, rounds, saveData])
 
   const removePlayer = useCallback((id: string) => {
-    setPlayers(prev => prev.filter(p => p.id !== id))
-  }, [])
+    const newPlayers = players.filter(p => p.id !== id)
+    setPlayers(newPlayers)
+    saveData(newPlayers, rounds)
+  }, [players, rounds, saveData])
 
   const updateMatchResult = useCallback((roundNumber: number, matchId: string, updates: Partial<Match>) => {
-    setRounds(prev => prev.map(r => {
+    const newRounds = rounds.map(r => {
       if (r.roundNumber !== roundNumber) return r
       return {
         ...r,
@@ -85,8 +112,10 @@ export function useTournamentData() {
           return { ...m, ...updates }
         })
       }
-    }))
-  }, [])
+    })
+    setRounds(newRounds)
+    saveData(players, newRounds)
+  }, [players, rounds, saveData])
 
   const generateNextRound = useCallback(() => {
     const nextRoundNum = rounds.length + 1
@@ -107,16 +136,21 @@ export function useTournamentData() {
       }
     }
 
-    setRounds(prev => [{ roundNumber: nextRoundNum, matches: nextMatches }, ...prev])
-  }, [players, rounds])
+    const newRounds = [{ roundNumber: nextRoundNum, matches: nextMatches }, ...rounds]
+    setRounds(newRounds)
+    saveData(players, newRounds)
+  }, [players, rounds, saveData])
 
   const deleteLastRound = useCallback(() => {
-    setRounds(prev => prev.slice(1))
-  }, [])
+    const newRounds = rounds.slice(1)
+    setRounds(newRounds)
+    saveData(players, newRounds)
+  }, [players, rounds, saveData])
 
   const resetTournament = useCallback(() => {
     setRounds([])
-  }, [])
+    saveData(players, [])
+  }, [players, saveData])
 
   return {
     players,
@@ -128,7 +162,9 @@ export function useTournamentData() {
     deleteLastRound,
     resetTournament,
     standings: calculateStandings(players, rounds),
-    isLoaded
+    isLoaded,
+    isSaving,
+    refresh: fetchData,
   }
 }
 
@@ -147,7 +183,6 @@ function calculateStandings(players: Player[], rounds: Round[]): Standing[] {
         statsMap[match.playerAId].opponents.push(match.playerBId)
         if (match.winnerId === match.playerAId) statsMap[match.playerAId].wins++
         else if (match.winnerId === match.playerBId) statsMap[match.playerAId].losses++
-        // Draws could be handled here if needed
       }
       
       if (statsMap[match.playerBId]) {
@@ -183,4 +218,3 @@ function calculateStandings(players: Player[], rounds: Round[]): Standing[] {
 
   return standings
 }
-

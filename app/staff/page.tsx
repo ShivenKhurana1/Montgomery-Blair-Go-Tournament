@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTournamentData } from '@/hooks/useTournamentData'
 
 export default function StaffPage() {
-  const { players, rounds, addPlayer, removePlayer, updateMatchResult, generateNextRound, deleteLastRound, resetTournament, isLoaded } = useTournamentData()
+  const { players, rounds, addPlayer, removePlayer, updateMatchResult, generateNextRound, deleteLastRound, resetTournament, isLoaded, isSaving } = useTournamentData()
   const [activeTab, setActiveTab] = useState<'players' | 'pairings' | 'results'>('players')
   const [newPlayerName, setNewPlayerName] = useState('')
 
@@ -35,9 +35,15 @@ export default function StaffPage() {
   return (
     <div className="container-custom py-12">
       <div className="mb-8 rounded-3xl border border-navy-300 bg-gradient-to-br from-red-900 via-red-800 to-red-700 p-8 shadow-lg">
-        <div className="mb-4 flex items-center space-x-2">
+        <div className="mb-4 flex items-center justify-between">
           <div className="rounded bg-white/20 px-2 py-1 text-xs font-bold uppercase tracking-wider text-white">
             Admin Area
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className={`h-2 w-2 rounded-full ${isSaving ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
+            <span className="text-xs font-medium text-red-100">
+              {isSaving ? 'Saving...' : 'Synced'}
+            </span>
           </div>
         </div>
 
