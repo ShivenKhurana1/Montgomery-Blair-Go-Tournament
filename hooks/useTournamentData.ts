@@ -30,6 +30,15 @@ export type Standing = {
   playerId: string
 }
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 export function useTournamentData() {
   const [players, setPlayers] = useState<Player[]>([])
   const [rounds, setRounds] = useState<Round[]>([])
@@ -112,15 +121,36 @@ export function useTournamentData() {
   const generateNextRound = useCallback(() => {
     const nextRoundNum = rounds.length + 1
     const currentStandings = calculateStandings(players, rounds)
-    const sortedPlayerIds = currentStandings.map(s => s.playerId)
+    
+    // Group players by (Wins, SOS) for shuffling
+    const groups: Record<string, string[]> = {}
+    currentStandings.forEach(s => {
+      const key = `${s.wins}-${s.sos}`
+      if (!groups[key]) groups[key] = []
+      groups[key].push(s.playerId)
+    })
+
+    // Sort group keys to maintain Swiss order (high to low)
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      const [wA, sA] = a.split('-').map(Number)
+      const [wB, sB] = b.split('-').map(Number)
+      if (wB !== wA) return wB - wA
+      return sB - sA
+    })
+
+    // Create a shuffled, flattened list of player IDs
+    let shuffledPlayerIds: string[] = []
+    sortedKeys.forEach(key => {
+      shuffledPlayerIds = shuffledPlayerIds.concat(shuffleArray(groups[key]))
+    })
     
     const nextMatches: Match[] = []
-    for (let i = 0; i < sortedPlayerIds.length; i += 2) {
-      if (sortedPlayerIds[i + 1]) {
+    for (let i = 0; i < shuffledPlayerIds.length; i += 2) {
+      if (shuffledPlayerIds[i + 1]) {
         nextMatches.push({
           id: String(nextMatches.length + 1),
-          playerAId: sortedPlayerIds[i],
-          playerBId: sortedPlayerIds[i + 1],
+          playerAId: shuffledPlayerIds[i],
+          playerBId: shuffledPlayerIds[i + 1],
           winnerId: null,
           pointsA: '',
           pointsB: '',
